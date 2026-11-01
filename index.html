@@ -113,13 +113,17 @@ const base={};out.forEach(x=>{if(!x[0].includes('('))base[x[0]]=x.slice(1,4).joi
 out=out.filter(x=>!(x[0].includes('(')&&!RG.test(x[0])&&!TAU.test(x[0])&&base[x[0].split(' (')[0]]===x.slice(1,4).join()));
 const roots={};let k=0;out.forEach(x=>{x[4]=roots[x[4]]??=k++;});return out;}
 const fmt=t=>new Date(t).toLocaleString([],{dateStyle:'medium',timeStyle:'short'});
-function setSrc(t){$('src').textContent=t?'Data from PvPoke, '+fmt(t):'Data from PvPoke, '+new Date('2026-11-01T12:00:00Z').toLocaleDateString([],{dateStyle:'medium'})+' (fallback)';}
-setSrc(0);
-function use(data,t){D=data;setSrc(t);map=new Map(D.map(x=>[x[0].toLowerCase(),x]));for(const k in cache)delete cache[k];run();}
-try{const c=JSON.parse(localStorage.getItem('gm5')||'null');if(c&&c.d)use(c.d,c.t);}catch(e){}
-(async()=>{let t=0;try{t=+JSON.parse(localStorage.getItem('gm5')||'{}').t||0;}catch(e){}
-if(Date.now()-t<864e5)return;
-try{const r=await fetch(SRC,{cache:'no-cache'});if(!r.ok)throw 0;const d=build(await r.json());if(d.length<=500)throw 0;const now=Date.now();use(d,now);try{localStorage.setItem('gm5',JSON.stringify({t:now,d}));}catch(e){}}catch(e){}})();
+function setSrc(t,fb){$('src').textContent='Data from PvPoke, '+fmt(t)+(fb?' (fallback)':'');}
+const SNAP='2026-11-01T17:37:49Z';
+setSrc(SNAP,true);
+function use(data,t){D=data;setSrc(t,false);map=new Map(D.map(x=>[x[0].toLowerCase(),x]));for(const k in cache)delete cache[k];run();}
+try{const c=JSON.parse(localStorage.getItem('gm6')||'null');if(c&&c.d)use(c.d,c.c||c.t);}catch(e){}
+(async()=>{let c={};try{c=JSON.parse(localStorage.getItem('gm6')||'{}')||{};}catch(e){}
+if(Date.now()-(c.t||0)<864e5)return;
+let sha='',cd='';try{const r=await fetch('https://api.github.com/repos/pvpoke/pvpoke/commits?path=src/data/gamemaster/pokemon.json&per_page=1');if(r.ok){const j=await r.json();sha=j[0].sha;cd=j[0].commit.committer.date;}}catch(e){}
+const save=o=>{try{localStorage.setItem('gm6',JSON.stringify(o));}catch(e){}};
+if(sha&&c.d&&c.sha===sha){save({...c,t:Date.now()});return;}
+try{const r=await fetch(SRC,{cache:'no-cache'});if(!r.ok)return;const d=build(await r.json());if(d.length<=500)return;const now=Date.now();use(d,cd||now);save({t:now,c:cd||now,sha,d});}catch(e){}})();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
