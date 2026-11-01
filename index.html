@@ -74,6 +74,7 @@ return ' class="pn" style="background-image:linear-gradient(110deg,'+a+' 0 40%,'
 function run(){const B=find($('sp').value);const a=iv('a'),d=iv('d'),s=iv('s');const o=$('out');
 if(!B){o.innerHTML='<p class="err">Pick a Pokémon from the list.</p>';return;}
 if(a===null||d===null||s===null){o.innerHTML='<p class="err">Enter IVs from 0 to 15.</p>';return;}
+try{localStorage.setItem('last',JSON.stringify({sp:B[0],a,d,s}));}catch(e){}
 const LS=[['Little',500,'#e3350d','var(--white)','split'],['Great',1500,'#2f6fde','#e3350d',1],['Ultra',2500,'#e0b400','var(--black)',2],['Master',Infinity,'#8a3fd1','#ff6fc8',3]];
 const stripes=(bg,fg,k)=>{if(k==='split')return 'linear-gradient(90deg,'+bg+' 0 50%,'+fg+' 50% 100%)';let g=[bg+' 0%'];for(let q=1;q<=k;q++){const c=q/(k+1)*100,w=5;g.push(bg+' '+(c-w)+'%',fg+' '+(c-w)+'%',fg+' '+(c+w)+'%',bg+' '+(c+w)+'%');}g.push(bg+' 100%');return 'linear-gradient(110deg,'+g.join(',')+')';};let rows='';
 LG=Infinity;const maxCP=best(B,a,d,s,50).cp;let prev=0;
@@ -103,6 +104,7 @@ $('f').addEventListener('submit',e=>{e.preventDefault();if(document.activeElemen
 document.querySelectorAll('.ivs input').forEach(el=>el.addEventListener('focus',()=>el.select()));
 const nxt={a:'d',d:'s'};['a','d','s'].forEach(id=>$(id).addEventListener('input',()=>{const v=$(id).value;if(v.length>=2||v==='0'||(v.length===1&&+v>=2)){if(nxt[id])$(nxt[id]).focus();else $(id).blur();}}));
 $('sp').addEventListener('focus',()=>$('sp').select());
+try{const l=JSON.parse(localStorage.getItem('last')||'null');if(l&&l.sp){$('sp').value=l.sp;$('a').value=l.a;$('d').value=l.d;$('s').value=l.s;}}catch(e){}
 run();
 
 const SRC='https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/gamemaster/pokemon.json';
