@@ -68,6 +68,7 @@ function isDark(){const c=getComputedStyle(document.body).backgroundColor.match(
 function fit(h,dark){let [H,S,L]=hexL(h);L=dark?Math.max(L,58):Math.min(L,42);return 'hsl('+H.toFixed(0)+' '+S.toFixed(0)+'% '+L.toFixed(0)+'%)';}
 const baseOf=n=>n.replace(/ \((Alolan|Galarian|Hisuian|Paldean|Aqua|Blaze|Combat)\)$/,'');
 let multiD=null,multi=null;function colored(n){if(multiD!==D){multiD=D;const g={};D.forEach(x=>{const b=baseOf(x[0]);(g[b]=g[b]||[]).push(x[0]);});multi=new Set();for(const b in g){const sig=new Set(g[b].map(m=>(COL[m]||[]).join()));if(g[b].length>1&&sig.size>1)g[b].forEach(m=>multi.add(m));}}return multi.has(n);}
+let fkD=null,fkM=null;function fk(x){if(fkD!==D){fkD=D;const par={},f=k=>{while((par[k]??=k)!==k)k=par[k];return k;},first={};D.forEach(y=>{const b=baseOf(y[0]);if(b in first)par[f(y[4])]=f(first[b]);else first[b]=y[4];});fkM=new Map(D.map(y=>[y,f(y[4])]));}return fkM.get(x);}
 function nameStyle(n){const c=COL[n];if(!c||!colored(n))return '';const dk=isDark(),a=fit(c[0],dk);if(c.length<2)return ' style="color:'+a+';-webkit-text-fill-color:'+a+'"';const b=fit(c[1],dk);
 return ' class="pn" style="background-image:linear-gradient(110deg,'+a+' 0 40%,'+b+' 40% 60%,'+a+' 60% 100%)"';}
 function run(){const B=find($('sp').value);const a=iv('a'),d=iv('d'),s=iv('s');const o=$('out');
@@ -78,7 +79,7 @@ const stripes=(bg,fg,k)=>{if(k==='split')return 'linear-gradient(90deg,'+bg+' 0 
 LG=Infinity;const maxCP=best(B,a,d,s,50).cp;let prev=0;
 for(const [n,c,bg,fg,k] of LS){if(maxCP<=prev)break;prev=c;LG=c;const t=table(B,50);const j=t.findIndex(x=>x.iv[0]===a&&x.iv[1]===d&&x.iv[2]===s),i=j<0?-1:t.findIndex(x=>x.sp===t[j].sp);
 rows+='<tr><td><span class="ln" style="background-image:'+stripes(bg,fg,k)+'">'+n+'</span></td>'+(i<0?'<td>–</td><td>–</td><td>over cap</td>':'<td>'+(i+1)+'</td><td>'+(t[j].sp/t[0].sp*100).toFixed(2)+'%</td><td>'+t[j].cp+'</td>')+'</tr>';}
-const famAll=D.filter(x=>x[4]===B[4]),groups={};famAll.forEach(x=>(groups[x[5]]=groups[x[5]]||[]).push(x));
+const famAll=D.filter(x=>fk(x)===fk(B)),groups={};famAll.forEach(x=>(groups[x[5]]=groups[x[5]]||[]).push(x));
 const par=x=>{if(!x[6])return;return (x[5]&&famAll.find(y=>y[0]===x[6]+' ('+x[5]+')'))||famAll.find(y=>y[0]===x[6]);},dep=(x,k=0)=>{const p=par(x);return p&&k<5?dep(p,k+1)+1:0;};
 for(const g in groups){const G=groups[g];for(let q=0;q<G.length;q++){const p=par(G[q]);if(p&&!G.includes(p))G.push(p);}G.sort((x,y)=>dep(x)-dep(y)||famAll.indexOf(x)-famAll.indexOf(y));}
 const fam=famAll.length>1?Object.keys(groups).sort((p,q)=>(p?1:0)-(q?1:0)):[];
