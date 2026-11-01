@@ -55,7 +55,11 @@ const cache={};
 function table(B,cap){const k=B[0]+cap+'|'+LG;if(cache[k])return cache[k];const t=[];for(let a=0;a<16;a++)for(let d=0;d<16;d++)for(let s=0;s<16;s++){const r=best(B,a,d,s,cap);if(r)t.push({iv:[a,d,s],...r});}t.sort((x,y)=>y.sp-x.sp);return cache[k]=t;}
 const $=id=>document.getElementById(id);
 function iv(id){const v=parseInt($(id).value,10);return v>=0&&v<=15?v:null;}
-function find(v){v=v.trim().toLowerCase();if(map.has(v))return map.get(v);const ws=v.split(/[\s()]+/).filter(Boolean);if(!ws.length)return;const m=D.filter(x=>{const n=x[0].toLowerCase();return ws.every(w=>n.includes(w));});return m.length===1?m[0]:undefined;}
+const wordsOf=n=>n.toLowerCase().split(/[\s()\-.'\u2019:]+/).filter(Boolean);
+function match(ws){const ws2=ws.flatMap(w=>wordsOf(w));const pre=D.filter(x=>{const n=wordsOf(x[0]);return ws2.every(w=>n.some(y=>y.startsWith(w)));});
+const r=pre.length?pre:D.filter(x=>{const n=x[0].toLowerCase();return ws.every(w=>n.includes(w));});
+return r.sort((x,y)=>(x[0].toLowerCase().startsWith(ws2[0])?0:1)-(y[0].toLowerCase().startsWith(ws2[0])?0:1)||(x[0].includes('(')?1:0)-(y[0].includes('(')?1:0));}
+function find(v){v=v.trim().toLowerCase();if(map.has(v))return map.get(v);const ws=v.split(/[\s()]+/).filter(Boolean);if(!ws.length)return;const m=match(ws);return m.length===1?m[0]:undefined;}
 function run(){const B=find($('sp').value);const a=iv('a'),d=iv('d'),s=iv('s');const o=$('out');
 if(!B){o.innerHTML='<p class="err">Pick a Pokémon from the list.</p>';return;}
 if(a===null||d===null||s===null){o.innerHTML='<p class="err">Enter IVs from 0 to 15.</p>';return;}
@@ -73,12 +77,12 @@ o.innerHTML=fam.map(g=>'<div class="fam">'+(fam.length>1?'<span class="rl">'+(g|
 }
 const sug=$('sug');let hi=-1,items=[];
 function show(){const q=$('sp').value.trim().toLowerCase();if(!q){hide();return;}
-const ws=q.split(/[\s()]+/).filter(Boolean);if(!ws.length){hide();return;}const hit=x=>{const n=x[0].toLowerCase();return ws.every(w=>n.includes(w));},st=D.filter(x=>hit(x)&&x[0].toLowerCase().startsWith(ws[0])),ct=D.filter(x=>hit(x)&&!x[0].toLowerCase().startsWith(ws[0]));
-items=st.concat(ct).slice(0,10);if(!items.length||(items.length===1&&items[0][0].toLowerCase()===q)){hide();return;}
+const ws=q.split(/[\s()]+/).filter(Boolean);if(!ws.length){hide();return;}items=match(ws).slice(0,10);if(!items.length||(items.length===1&&items[0][0].toLowerCase()===q)){hide();return;}
 hi=-1;sug.innerHTML=items.map((x,i)=>'<li role="option" data-i="'+i+'">'+x[0].replace(/</g,'&lt;')+'</li>').join('');sug.hidden=false;$('sp').setAttribute('aria-expanded','true');}
 function hide(){sug.hidden=true;$('sp').setAttribute('aria-expanded','false');}
 function pick(i){$('sp').value=items[i][0];hide();run();$('a').focus();}
-sug.addEventListener('pointerdown',e=>{const li=e.target.closest('li');if(li){e.preventDefault();pick(+li.dataset.i);}});
+sug.addEventListener('mousedown',e=>e.preventDefault());
+sug.addEventListener('click',e=>{const li=e.target.closest('li');if(li)pick(+li.dataset.i);});
 $('sp').addEventListener('input',show);
 $('sp').addEventListener('blur',()=>setTimeout(hide,100));
 $('sp').addEventListener('keydown',e=>{if(sug.hidden)return;const n=items.length;if(e.key==='ArrowDown'){hi=(hi+1)%n;}else if(e.key==='ArrowUp'){hi=(hi-1+n)%n;}else if(e.key==='Enter'||e.keyCode===13){e.preventDefault();pick(hi<0?0:hi);return;}else if(e.key==='Escape'){hide();return;}else return;e.preventDefault();[...sug.children].forEach((li,i)=>li.classList.toggle('on',i===hi));});
